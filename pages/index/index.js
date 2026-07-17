@@ -29,13 +29,11 @@ Page({
   _rotation: 0,    // current rotation in radians
   _raf: null,
 
-  onLoad: function () {
+  onReady: function () {
     var self = this;
-    // Query the canvas node after first render.
-    wx.nextTick(function () {
-      self._initCanvas(function () {
-        self._loadCategory('all');
-      });
+    // Canvas nodes are only reliably available in onReady (not onLoad).
+    self._initCanvas(function () {
+      self._loadCategory('all');
     });
   },
 
