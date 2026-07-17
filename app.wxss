@@ -1,0 +1,6 @@
+/* Global styles: night-market palette. */
+page {
+  background: #1a1424;
+  color: #faf3e6;
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Helvetica, sans-serif;
+}

@@ -1,0 +1,57 @@
+<view class="page">
+  <view class="header">
+    <view class="title">今晚吃啥 🎡</view>
+    <view class="subtitle">选择困难？交给转盘</view>
+  </view>
+
+  <!-- Category filter tabs -->
+  <scroll-view class="tabs" scroll-x="true" show-scrollbar="false">
+    <view class="tabs-inner">
+      <view
+        wx:for="{{categories}}"
+        wx:key="key"
+        class="tab {{item.key === activeCat ? 'tab--active' : ''}}"
+        bindtap="onSelectCat"
+        data-key="{{item.key}}"
+      >{{item.label}}</view>
+    </view>
+  </scroll-view>
+
+  <!-- Wheel -->
+  <view class="wheel-wrap">
+    <view class="pointer"></view>
+    <canvas
+      type="2d"
+      id="wheel"
+      class="wheel-canvas"
+      disable-scroll="true"
+    ></canvas>
+    <view class="spin-btn {{spinning ? 'spin-btn--busy' : ''}}" bindtap="onSpin">
+      <text class="spin-btn__text">{{spinning ? '···' : '转!'}}</text>
+    </view>
+  </view>
+
+  <!-- Result card -->
+  <view class="result {{result ? 'result--show' : ''}}">
+    <block wx:if="{{result}}">
+      <view class="result__label">今晚就吃</view>
+      <view class="result__name">{{result.name}} {{result.emoji}}</view>
+      <view class="result__cuisine">{{result.cuisine}}</view>
+      <view class="result__line">{{result.line}}</view>
+      <view class="result__again" bindtap="onSpin">再转一次 🔄</view>
+    </block>
+    <block wx:else>
+      <view class="result__hint">点中间「转!」按钮，让命运帮你点菜 👇</view>
+    </block>
+  </view>
+
+  <!-- Confetti overlay -->
+  <view class="confetti {{confetti ? 'confetti--go' : ''}}" wx:if="{{confetti}}">
+    <view
+      wx:for="{{confettiBits}}"
+      wx:key="id"
+      class="confetti__bit"
+      style="left:{{item.left}}%; background:{{item.color}}; animation-delay:{{item.delay}}s; transform: rotate({{item.rot}}deg);"
+    ></view>
+  </view>
+</view>

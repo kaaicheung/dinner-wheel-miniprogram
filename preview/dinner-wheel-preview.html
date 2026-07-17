@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>今晚吃啥 🎡</title>
+<style>
+  :root {
+    --night: #1a1424;
+    --night-2: #241a33;
+    --cream: #faf3e6;
+    --chili: #ff6b35;
+    --marigold: #ffd23f;
+    --teal: #2a9d8f;
+    --dim: rgba(250, 243, 230, 0.6);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(130% 70% at 50% -8%, rgba(255,107,53,0.20), transparent 62%),
+      radial-gradient(90% 60% at 50% 110%, rgba(42,157,143,0.14), transparent 60%),
+      var(--night);
+    color: var(--cream);
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Helvetica, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 18px 48px;
+    overflow-x: hidden;
+  }
+  .header { text-align: center; }
+  .title {
+    font-size: clamp(30px, 8vw, 40px);
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin: 0;
+    color: var(--marigold);
+    text-shadow: 0 2px 0 rgba(0,0,0,0.25);
+  }
+  .subtitle { margin: 6px 0 0; font-size: 14px; color: var(--dim); }
+
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin: 22px 0 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 420px;
+  }
+  .tab {
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 15px;
+    color: rgba(250,243,230,0.78);
+    background: rgba(255,255,255,0.06);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    user-select: none;
+  }
+  .tab:hover { background: rgba(255,255,255,0.1); }
+  .tab.active {
+    color: var(--night);
+    background: var(--marigold);
+    border-color: var(--marigold);
+    font-weight: 700;
+  }
+  .tab:focus-visible { outline: 2px solid var(--chili); outline-offset: 2px; }
+
+  .wheel-wrap {
+    position: relative;
+    width: min(88vw, 360px);
+    height: min(88vw, 360px);
+    margin: 18px 0 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #wheel { width: 100%; height: 100%; display: block; }
+  .pointer {
+    position: absolute;
+    top: -4px; left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-top: 24px solid var(--chili);
+    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.4));
+    z-index: 5;
+  }
+  .spin-btn {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 92px; height: 92px;
+    border-radius: 50%;
+    border: 4px solid var(--cream);
+    background: linear-gradient(160deg, #ff8a4c, #ff5722);
+    box-shadow: 0 6px 18px rgba(255,87,34,0.5), inset 0 -4px 8px rgba(0,0,0,0.2);
+    color: #fff;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    cursor: pointer;
+    z-index: 4;
+    transition: transform 0.12s ease;
+  }
+  .spin-btn:active { transform: translate(-50%, -50%) scale(0.94); }
+  .spin-btn:disabled { cursor: default; opacity: 0.85; }
+  .spin-btn:focus-visible { outline: 3px solid var(--marigold); outline-offset: 3px; }
+
+  .result {
+    width: 100%;
+    max-width: 360px;
+    margin-top: 22px;
+    padding: 22px 20px;
+    border-radius: 22px;
+    background: rgba(255,255,255,0.05);
+    border: 1.5px solid rgba(255,210,63,0.22);
+    text-align: center;
+    transition: all 0.28s ease;
+  }
+  .result.show {
+    background: rgba(255,210,63,0.08);
+    box-shadow: 0 10px 34px rgba(0,0,0,0.35);
+    animation: pop 0.4s ease;
+  }
+  @keyframes pop {
+    0% { transform: scale(0.94); opacity: 0.6; }
+    60% { transform: scale(1.03); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .hint { font-size: 15px; color: var(--dim); line-height: 1.6; }
+  .r-label { font-size: 13px; color: var(--dim); letter-spacing: 3px; }
+  .r-name { margin: 6px 0 0; font-size: clamp(30px, 9vw, 42px); font-weight: 800; color: var(--marigold); }
+  .r-cuisine {
+    display: inline-block; margin-top: 8px;
+    padding: 4px 14px; border-radius: 999px;
+    font-size: 13px; color: var(--chili);
+    background: rgba(255,107,53,0.14);
+  }
+  .r-line { margin-top: 14px; font-size: 16px; color: var(--cream); }
+  .again {
+    margin-top: 18px;
+    padding: 11px 30px;
+    border: none;
+    border-radius: 999px;
+    font-size: 15px; font-weight: 700;
+    color: var(--night);
+    background: var(--marigold);
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .again:active { transform: scale(0.96); }
+  .again:focus-visible { outline: 2px solid var(--chili); outline-offset: 2px; }
+
+  /* Confetti */
+  #confetti {
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 50; overflow: hidden;
+  }
+  .bit {
+    position: absolute; top: -16px;
+    width: 8px; height: 13px; border-radius: 2px;
+    will-change: transform, opacity;
+  }
+  @keyframes fall {
+    0% { opacity: 1; transform: translateY(-16px) rotate(0deg); }
+    100% { opacity: 0; transform: translateY(105vh) rotate(560deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .result.show { animation: none; }
+    .bit { animation: none !important; display: none; }
+  }
+  .foot { margin-top: 26px; font-size: 12px; color: rgba(250,243,230,0.35); }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1 class="title">今晚吃啥 🎡</h1>
+    <p class="subtitle">选择困难？交给转盘</p>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="wheel-wrap">
+    <div class="pointer"></div>
+    <canvas id="wheel" width="360" height="360"></canvas>
+    <button class="spin-btn" id="spinBtn" aria-label="转动转盘">转!</button>
+  </div>
+
+  <div class="result" id="result">
+    <div class="hint">点中间「转!」按钮，让命运帮你点菜 👇</div>
+  </div>
+
+  <div id="confetti" aria-hidden="true"></div>
+  <div class="foot">纯本地运行 · 无网络依赖</div>
+
+<script>
+"use strict";
+
+/* ---------- Shared dish data (mirrors data/dishes.js) ---------- */
+var CATEGORIES = [
+  { key: 'all', label: '全部' },
+  { key: 'cn', label: '中餐' },
+  { key: 'west', label: '西餐' },
+  { key: 'sea', label: '东南亚' },
+  { key: 'jk', label: '日韩' }
+];
+var DISHES = {
+  cn: [
+    {name:'水煮鱼',cuisine:'川菜'},{name:'麻辣香锅',cuisine:'川菜'},{name:'回锅肉',cuisine:'川菜'},{name:'口水鸡',cuisine:'川菜'},
+    {name:'烧腊',cuisine:'粤菜'},{name:'老火靓汤',cuisine:'粤菜'},{name:'清蒸海鲜',cuisine:'粤菜'},{name:'点心',cuisine:'粤菜'},
+    {name:'剁椒鱼头',cuisine:'湘菜'},{name:'辣椒炒肉',cuisine:'湘菜'},
+    {name:'狮子头',cuisine:'淮扬菜'},{name:'大煮干丝',cuisine:'淮扬菜'},
+    {name:'东坡肉',cuisine:'浙菜本帮'},{name:'红烧肉',cuisine:'浙菜本帮'},
+    {name:'锅包肉',cuisine:'东北菜'},{name:'铁锅炖',cuisine:'东北菜'},
+    {name:'烤鸭',cuisine:'京菜'},{name:'炸酱面',cuisine:'京菜'},
+    {name:'兰州拉面',cuisine:'西北菜'},{name:'大盘鸡',cuisine:'西北菜'},{name:'羊肉串',cuisine:'西北菜'},
+    {name:'过桥米线',cuisine:'云南菜'},{name:'菌子',cuisine:'云南菜'},
+    {name:'潮汕牛肉火锅',cuisine:'潮汕'},{name:'卤鹅',cuisine:'潮汕'},
+    {name:'麻辣火锅',cuisine:'火锅'},{name:'椰子鸡',cuisine:'火锅'},{name:'猪肚鸡',cuisine:'火锅'}
+  ],
+  west: [
+    {name:'Pasta 意面',cuisine:'意大利'},{name:'Pizza 披萨',cuisine:'意大利'},{name:'Risotto 烩饭',cuisine:'意大利'},
+    {name:'法式牛排',cuisine:'法餐'},{name:'鹅肝',cuisine:'法餐'},
+    {name:'Tapas',cuisine:'西班牙'},{name:'Paella 海鲜饭',cuisine:'西班牙'},
+    {name:'汉堡',cuisine:'美式'},{name:'BBQ 烧烤',cuisine:'美式'},
+    {name:'德国猪肘',cuisine:'德国'},{name:'德式香肠',cuisine:'德国'},
+    {name:'Gyros',cuisine:'希腊'},{name:'巴西烤肉',cuisine:'巴西'},
+    {name:'Taco',cuisine:'墨西哥'},{name:'Burrito',cuisine:'墨西哥'}
+  ],
+  sea: [
+    {name:'冬阴功',cuisine:'泰国'},{name:'绿咖喱',cuisine:'泰国'},{name:'Pad Thai',cuisine:'泰国'},
+    {name:'Pho 越南粉',cuisine:'越南'},{name:'越式春卷',cuisine:'越南'},{name:'Bánh Mì',cuisine:'越南'},
+    {name:'海南鸡饭',cuisine:'新马'},{name:'Laksa',cuisine:'新马'},{name:'肉骨茶',cuisine:'新马'},
+    {name:'沙嗲',cuisine:'印尼'},{name:'Rendang',cuisine:'印尼'},
+    {name:'Adobo',cuisine:'菲律宾'},{name:'茶叶沙拉',cuisine:'缅甸'}
+  ],
+  jk: [
+    {name:'寿司',cuisine:'日料'},{name:'拉面',cuisine:'日料'},{name:'烧肉',cuisine:'日料'},{name:'天妇罗',cuisine:'日料'},
+    {name:'韩式烤肉',cuisine:'韩餐'},{name:'部队锅',cuisine:'韩餐'},{name:'石锅拌饭',cuisine:'韩餐'},{name:'韩式炸鸡',cuisine:'韩餐'}
+  ]
+};
+var ALL_MIX = [
+  {name:'麻辣火锅',cuisine:'火锅'},{name:'烤鸭',cuisine:'京菜'},{name:'寿司',cuisine:'日料'},{name:'韩式烤肉',cuisine:'韩餐'},
+  {name:'Pizza 披萨',cuisine:'意大利'},{name:'汉堡',cuisine:'美式'},{name:'冬阴功',cuisine:'泰国'},{name:'Pho 越南粉',cuisine:'越南'},
+  {name:'水煮鱼',cuisine:'川菜'},{name:'红烧肉',cuisine:'浙菜本帮'},{name:'海南鸡饭',cuisine:'新马'},{name:'兰州拉面',cuisine:'西北菜'}
+];
+var FUN_LINES = [
+  '别纠结了，就它了！','天选之食，安排上 🍽️','命运的齿轮开始转动','今晚的胃已经预定',
+  '就是这个味儿 😋','缘分到了，冲！','选择困难症退散','不许反悔哦～'
+];
+var SEGMENT_CAP = 12;
+function shuffle(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function getWheelItems(key){if(key==='all')return ALL_MIX.slice();var l=DISHES[key]||[];return l.length<=SEGMENT_CAP?l.slice():shuffle(l).slice(0,SEGMENT_CAP);}
+function pickFunLine(){return FUN_LINES[Math.floor(Math.random()*FUN_LINES.length)];}
+
+/* ---------- Wheel rendering + spin ---------- */
+var SEG_COLORS = ['#ff6b35','#f7b32b','#e94f37','#2a9d8f','#e76f51','#ffca3a','#c1666b','#4d908e','#f9844a','#e9c46a','#bc4749','#43aa8b'];
+var CONFETTI_COLORS = ['#ff6b35','#ffd23f','#2a9d8f','#e94f37','#f9844a','#faf3e6'];
+var TWO_PI = Math.PI * 2;
+
+var canvas = document.getElementById('wheel');
+var ctx = canvas.getContext('2d');
+var dpr = window.devicePixelRatio || 1;
+var CSS = 360;              // logical size
+var items = [];
+var rotation = 0;
+var spinning = false;
+var activeCat = 'all';
+
+function sizeCanvas() {
+  var rect = canvas.getBoundingClientRect();
+  CSS = rect.width || 360;
+  canvas.width = CSS * dpr;
+  canvas.height = CSS * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+function draw() {
+  var n = items.length;
+  if (!n) return;
+  var cx = CSS/2, cy = CSS/2, radius = CSS/2 - 6, seg = TWO_PI/n;
+  ctx.clearRect(0,0,CSS,CSS);
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(rotation);
+  for (var i=0;i<n;i++){
+    var start=i*seg, end=start+seg;
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,radius,start,end); ctx.closePath();
+    ctx.fillStyle = SEG_COLORS[i % SEG_COLORS.length]; ctx.fill();
+    ctx.strokeStyle='rgba(26,20,36,0.55)'; ctx.lineWidth=2; ctx.stroke();
+    ctx.save();
+    ctx.rotate(start + seg/2);
+    ctx.textAlign='right'; ctx.textBaseline='middle'; ctx.fillStyle='#1a1424';
+    var fs = n>10?13:(n>7?15:17);
+    ctx.font = '600 ' + fs + 'px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif';
+    var label = items[i].name;
+    if (label.length > 7) label = label.slice(0,6) + '…';
+    ctx.fillText(label, radius - 14, 0);
+    ctx.restore();
+  }
+  ctx.beginPath(); ctx.arc(0,0,radius,0,TWO_PI);
+  ctx.strokeStyle='#faf3e6'; ctx.lineWidth=5; ctx.stroke();
+  ctx.restore();
+}
+
+function loadCategory(key) {
+  activeCat = key;
+  items = getWheelItems(key);
+  rotation = 0;
+  renderTabs();
+  showHint();
+  draw();
+}
+
+function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
+
+function spin() {
+  if (spinning || !items.length) return;
+  spinning = true;
+  spinBtn.disabled = true;
+  spinBtn.textContent = '···';
+  showHint(true);
+
+  var n = items.length, seg = TWO_PI/n;
+  var winIndex = Math.floor(Math.random()*n);
+  var segCenter = winIndex*seg + seg/2;
+  var pointerAngle = -Math.PI/2;               // top
+  var extraTurns = 5 + Math.floor(Math.random()*3);
+  var target = pointerAngle - segCenter;
+  var current = rotation % TWO_PI;
+  var normalized = ((target - current) % TWO_PI + TWO_PI) % TWO_PI;
+  var totalDelta = extraTurns*TWO_PI + normalized;
+  var startRotation = rotation;
+  var duration = 3500, startTs = null;
+
+  function frame(ts){
+    if (startTs === null) startTs = ts;
+    var t = Math.min((ts - startTs)/duration, 1);
+    rotation = startRotation + totalDelta * easeOutCubic(t);
+    draw();
+    if (t < 1) requestAnimationFrame(frame);
+    else { rotation = startRotation + totalDelta; draw(); landed(winIndex); }
+  }
+  requestAnimationFrame(frame);
+}
+
+var emojis = ['🍜','🍲','🍱','🥘','🍛','🍢','🥟'];
+function landed(winIndex) {
+  spinning = false;
+  spinBtn.disabled = false;
+  spinBtn.textContent = '转!';
+  var item = items[winIndex];
+  var emoji = emojis[Math.floor(Math.random()*emojis.length)];
+  var el = document.getElementById('result');
+  el.className = 'result show';
+  el.innerHTML =
+    '<div class="r-label">今晚就吃</div>' +
+    '<div class="r-name">' + esc(item.name) + ' ' + emoji + '</div>' +
+    '<div class="r-cuisine">' + esc(item.cuisine) + '</div>' +
+    '<div class="r-line">' + esc(pickFunLine()) + '</div>' +
+    '<button class="again" id="againBtn">再转一次 🔄</button>';
+  document.getElementById('againBtn').addEventListener('click', spin);
+  celebrate();
+}
+
+function showHint(busy) {
+  var el = document.getElementById('result');
+  el.className = 'result';
+  el.innerHTML = '<div class="hint">' +
+    (busy ? '转盘转起来啦，看命运怎么说 ✨' : '点中间「转!」按钮，让命运帮你点菜 👇') +
+    '</div>';
+}
+
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+/* Confetti */
+function celebrate() {
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var box = document.getElementById('confetti');
+  box.innerHTML = '';
+  for (var i=0;i<44;i++){
+    var b = document.createElement('div');
+    b.className = 'bit';
+    b.style.left = Math.random()*100 + '%';
+    b.style.background = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+    b.style.animation = 'fall ' + (1.4 + Math.random()*0.8).toFixed(2) + 's ease-in ' + (Math.random()*0.4).toFixed(2) + 's forwards';
+    box.appendChild(b);
+  }
+  setTimeout(function(){ box.innerHTML=''; }, 2600);
+}
+
+/* Tabs */
+function renderTabs() {
+  var box = document.getElementById('tabs');
+  box.innerHTML = '';
+  CATEGORIES.forEach(function(c){
+    var t = document.createElement('button');
+    t.className = 'tab' + (c.key===activeCat ? ' active' : '');
+    t.textContent = c.label;
+    t.type = 'button';
+    t.addEventListener('click', function(){ if (!spinning) loadCategory(c.key); });
+    box.appendChild(t);
+  });
+}
+
+var spinBtn = document.getElementById('spinBtn');
+spinBtn.addEventListener('click', spin);
+window.addEventListener('resize', function(){ sizeCanvas(); draw(); });
+
+sizeCanvas();
+loadCategory('all');
+</script>
+</body>
+</html>

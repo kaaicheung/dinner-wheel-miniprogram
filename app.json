@@ -1,0 +1,14 @@
+{
+  "pages": [
+    "pages/index/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "今晚吃啥 🎡",
+    "navigationBarBackgroundColor": "#1a1424",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#1a1424",
+    "backgroundTextStyle": "light"
+  },
+  "sitemapLocation": "sitemap.json",
+  "style": "v2"
+}
