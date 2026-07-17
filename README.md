@@ -11,7 +11,7 @@
 ## 导入微信开发者工具
 1. 打开 **微信开发者工具** → 新建/导入项目。
 2. 目录选择本文件夹（含 `app.json` 的那一层，即仓库根目录）。
-3. **AppID**：`project.config.json` 里填的是占位符 **`touristappid`**（测试号）。
+3. **AppID**：`project.config.json` 里填的是占位符 **`wxd7d745a7cc14f6c0`**（测试号）。
    - 用测试号可直接预览，无需真实 AppID。
    - 若要真机预览 / 发布，请在 `project.config.json` 把 `appid` 换成你自己的小程序 AppID。
 4. 打开后应直接进入首页转盘。
@@ -19,7 +19,7 @@
 ## 结构
 ```
 app.json / app.js / app.wxss        # 全局配置与样式
-project.config.json                 # 工具项目配置（appid=touristappid 占位）
+project.config.json                 # 工具项目配置（appid=wxd7d745a7cc14f6c0 占位）
 sitemap.json
 data/dishes.js                      # 共享菜品数据（分类 → 菜）
 pages/index/
